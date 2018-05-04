@@ -5,7 +5,7 @@ from math import *
 import pygame
 from pygame.locals import *
 
-from individuals import Fish, Shark, Food, Badge
+from individuals import Individual, Fish, Shark, Food, Badge
 
 def getCompleteRule( iterations ):
 	rules = ["X"]
@@ -35,6 +35,10 @@ fishImage = pygame.image.load( "../Assets/fish.png" ).convert_alpha()
 #print( fishImage.get_width(), fishImage.get_height() )
 convertedFishImage = pygame.transform.scale( fishImage, ( 100, 60 ) )
 sharkImage = pygame.image.load( "../Assets/shark.png" ).convert_alpha()
+skin1 = pygame.image.load( "../Assets/skin1.png" ).convert()
+skin1 = pygame.transform.scale( skin1, ( int( skin1.get_width() / 4 ), int( skin1.get_height() / 4 ) ) )
+skin2 = pygame.image.load( "../Assets/skin2.png" ).convert()
+skin2 = pygame.transform.scale( skin2, ( int( skin2.get_width() / 6 ), int( skin2.get_height() / 6 ) ) )
 
 background = pygame.image.load( "../Assets/background.jpg" ).convert()
 screen.blit( background, ( 0, 0 ) )
@@ -44,6 +48,7 @@ fishTotal = 50
 sharkTotal = 3
 foodTotal = 100
 fishList = []
+skinList = []
 sharkList = []
 food = pygame.sprite.RenderPlain()
 #badges = pygame.sprite.RenderPlain()
@@ -55,9 +60,12 @@ for index in range( fishTotal ):
 	#fishList.append( Fish( 1, index + 1, fishImage ) )
 	if index % 2 == 0:
 		fish = Fish( 1, index + 1, fishImage )
+		skin = Individual( 0, 0, skin1 )
 	else:
 		fish = Fish( 2, index + 1, convertedFishImage )
+		skin = Individual( 0, 0, skin2 )
 	fishList.append( fish )
+	skinList.append( skin )
 	#badges.add( Badge( fish.x, fish.y ) )
 
 for index in range( sharkTotal ):
@@ -115,18 +123,23 @@ while True:
 	screen.blit( background, ( 0, 0 ) )
 	food.draw( screen )
 	#badges.empty()
-	for fish in fishList:
+	for i in range( len( fishList ) ):
+		fish = fishList[i]
 		screen.blit( background, fish.position, fish.position )
+		#screen.blit( background, fish.position, fish.position )
 	for shark in sharkList:
 		screen.blit( background, shark.position, shark.position )
 
 	for shark in sharkList:
 		shark.move( fishList )
 		screen.blit( shark.image, shark.position )
-	for fish in fishList:
+	for i in range( len( fishList ) ):
+		fish = fishList[i]
+		skin = skinList[i]
 		fish.move( fishList, sharkList, food )
 		if fish.energy > 0:
 			screen.blit( fish.image, fish.position )
+			screen.blit( skin.image, fish.position.center )
 			#badges.add( Badge( fish.position.centerx, fish.position.centery ) )
 			screen.blit( font.render( str( fish.energy ), True, ( 0, 0, 0 ) ), fish.position )
 	#badges.draw( screen )
