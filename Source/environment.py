@@ -4,10 +4,11 @@ from random import randrange as randomRange
 import pygame
 from pygame.locals import *
 
-from individuals import Flock, Individual
+from individuals import Flock, SharkSet, Individual
 
 FISH_1 = 20
 FISH_2 = 30
+SHARKS = 5
 
 pygame.init()
 screen = pygame.display.set_mode( ( 960, 600 ), pygame.RESIZABLE )
@@ -20,6 +21,7 @@ screen.blit( backgroundImage, ( 0, 0 ) )
 
 fishImage = pygame.image.load( "../Assets/fish.png" ).convert_alpha()
 fishImageSmall = pygame.transform.scale( fishImage, ( 100, 60 ) )
+sharkImage = pygame.image.load( "../Assets/shark.png" ).convert_alpha()
 
 height = pygame.display.Info().current_h
 width = pygame.display.Info().current_w
@@ -31,6 +33,10 @@ for i in range( FISH_1 ):
 flock2 = Flock()
 for i in range( FISH_2 ):
 	flock2.addBoid( Individual( 1, i, fishImageSmall, randomRange( width ), randomRange( height ) ) )
+
+sharkSet = SharkSet()
+for i in range( SHARKS ):
+	sharkSet.addShark( Individual( 2, i, sharkImage, randomRange( width ), randomRange( height ) ) )
 
 while True:
 	for event in pygame.event.get():
@@ -52,6 +58,12 @@ while True:
 	flock2.run(
 		screen = screen,
 		font = arialFont,
+		height = height,
+		width = width
+	)
+	sharkSet.run(
+		boids = flock1.boids + flock2.boids,
+		screen = screen,
 		height = height,
 		width = width
 	)
