@@ -13,6 +13,8 @@ pygame.init()
 screen = pygame.display.set_mode( ( 960, 600 ), pygame.RESIZABLE )
 pygame.display.set_caption( "Artificial Life Project" )
 
+arialFont = pygame.font.SysFont( "Arial", 20, True )
+
 backgroundImage = pygame.image.load( "../Assets/background.jpg" ).convert()
 screen.blit( backgroundImage, ( 0, 0 ) )
 
@@ -43,11 +45,13 @@ while True:
 
 	flock1.run(
 		screen = screen,
+		font = arialFont,
 		height = height,
 		width = width
 	)
 	flock2.run(
 		screen = screen,
+		font = arialFont,
 		height = height,
 		width = width
 	)
