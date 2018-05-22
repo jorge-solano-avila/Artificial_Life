@@ -6,8 +6,8 @@ import pygame.gfxdraw
 from pygame.locals import *
 from pygame.color import *
 
-ENERGY = 100
-VISION = 10
+ENERGY = 1000
+VISION = 200
 MAX_VELOCITY = 4
 
 class Flock():
@@ -17,7 +17,7 @@ class Flock():
 	def addBoid( self, boid ):
 		self.boids.append( boid )
 
-	def run( self, screen, height, width ):
+	def run( self, screen, font, height, width ):
 		for boid in self.boids:
 			closeBoids = []
 			for otherBoid in self.boids:
@@ -25,8 +25,8 @@ class Flock():
 					continue
 
 				distance = boid.distance( otherBoid )
-				if distance < 200:
-					closeBoids.append(otherBoid)
+				if distance < boid.vision:
+					closeBoids.append( otherBoid )
 
 			boid.moveCloser( closeBoids )
 			boid.moveWith( closeBoids )
@@ -44,11 +44,21 @@ class Flock():
 				
 			boid.move()
 			
-		for boid in self.boids:
+		i = 0
+		while i < len( self.boids ):
+			boid = self.boids[i]
+			boid.energy -= 1
+			if boid.energy < 1:
+				del self.boids[i]
+				i -= 1
+
 			boidRect = pygame.Rect( boid.rect )
 			boidRect.x = boid.x
 			boidRect.y = boid.y
 			screen.blit( boid.image, boidRect )
+			screen.blit( font.render( str( boid.energy ), True, ( 0, 0, 0 ) ), boidRect )
+
+			i += 1
 
 class Individual():
 	def __init__( self, type, id, image, x, y ):
