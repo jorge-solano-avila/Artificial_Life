@@ -60,6 +60,42 @@ class Flock():
 
 			i += 1
 
+class SharkSet():
+	def __init__( self ):
+		self.sharks = []
+
+	def addShark( self, shark ):
+		self.sharks.append( shark )
+
+	def run( self, boids, screen, height, width ):
+		for shark in self.sharks:
+			closeBoids = []
+			for boid in boids:
+				distance = shark.distance( boid )
+				if distance < VISION:
+					closeBoids.append( boid )
+
+			shark.moveCloser( closeBoids )
+			shark.moveWith( closeBoids )
+
+			border = 25
+			if shark.x < border and shark.velocityX < 0:
+				shark.velocityX = -shark.velocityX * random()
+			if shark.x > width - border and shark.velocityX > 0:
+				shark.velocityX = -shark.velocityX * random()
+			if shark.y < border and shark.velocityY < 0:
+				shark.velocityY = -shark.velocityY * random()
+			if shark.y > height - border and shark.velocityY > 0:
+				shark.velocityY = -shark.velocityY * random()
+				
+			shark.move()
+			
+		for shark in self.sharks:
+			sharkRect = pygame.Rect( shark.rect )
+			sharkRect.x = shark.x
+			sharkRect.y = shark.y
+			screen.blit( shark.image, sharkRect )
+
 class Individual():
 	def __init__( self, type, id, image, x, y ):
 		self.type = type
@@ -94,8 +130,6 @@ class Individual():
 
 		avgX /= len( individuals )
 		avgY /= len( individuals )
-
-		distance = math.sqrt( ( avgX * avgX ) + ( avgY * avgY ) ) * -1.0
 
 		self.velocityX -= ( avgX / 100 )
 		self.velocityY -= ( avgY / 100 )
