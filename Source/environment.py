@@ -8,7 +8,7 @@ from individuals import Flock, SharkSet, TreeSet, FoodSet, Individual
 
 FISH_1 = 10
 FISH_2 = 20
-SHARKS = 3
+SHARKS = 4
 TREES = 10
 
 pygame.init()
@@ -37,11 +37,19 @@ skin2Image = pygame.transform.scale( skin2Image, ( int( skin2Image.get_width() /
 height = pygame.display.Info().current_h
 width = pygame.display.Info().current_w
 
-flock1 = Flock( skin = skin1Image )
+flock1 = Flock(
+	skin = skin1Image,
+	fish = fishImage,
+	reproduceProbability = 1 / ( FISH_1 * 100 )
+)
 for i in range( FISH_1 ):
 	flock1.addBoid( Individual( 0, i, fishImage, randomRange( width ), randomRange( height ) ) )
 
-flock2 = Flock( skin = skin2Image )
+flock2 = Flock(
+	skin = skin2Image,
+	fish = fishImageSmall,
+	reproduceProbability = 1 / ( FISH_2 * 100 )
+)
 for i in range( FISH_2 ):
 	flock2.addBoid( Individual( 1, i, fishImageSmall, randomRange( width ), randomRange( height ) ) )
 
@@ -78,14 +86,20 @@ while True:
 
 	flock1.run(
 		sharks = sharkSet.sharks,
+		food = foodSet.food,
 		screen = screen,
+		fishImage = fishImage,
+		fishImageSmall = fishImageSmall,
 		font = arialFont,
 		height = height,
 		width = width
 	)
 	flock2.run(
 		sharks = sharkSet.sharks,
+		food = foodSet.food,
 		screen = screen,
+		fishImage = fishImage,
+		fishImageSmall = fishImageSmall,
 		font = arialFont,
 		height = height,
 		width = width
@@ -100,13 +114,13 @@ while True:
 	foodSet.draw( screen = screen )
 
 	miliseconds = pygame.time.get_ticks()
-	if miliseconds >= foodIndex * 30000 and miliseconds <= foodIndex * 30000 + 1000:
+	if miliseconds >= foodIndex * 60000 and miliseconds <= foodIndex * 60000 + 1000:
 		if ungeneratedFood:
 			foodSet.add( trees = treeSet.trees )
 
 			ungeneratedFood = False
 			foodIndex += 1
-	if miliseconds >= ( foodIndex - 1 ) * 30000 + 1000:
+	if miliseconds >= ( foodIndex - 1 ) * 60000 + 1000:
 		ungeneratedFood = True
 	pygame.display.update()
 	pygame.time.delay( 10 )
