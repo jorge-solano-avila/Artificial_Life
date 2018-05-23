@@ -68,6 +68,8 @@ while True:
 				trees = [tree1Image, tree2Image, tree3Image]
 				treeSet.addTree( Individual( 3, i, trees[randomRange( 3 )], randomRange( width ), randomRange( height ) ) )
 
+			foodSet.add( trees = treeSet.trees )
+
 	screen.blit( backgroundImage, ( 0, 0 ) )
 
 	flock1.run(
