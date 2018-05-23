@@ -6,7 +6,7 @@ import pygame.gfxdraw
 from pygame.locals import *
 from pygame.color import *
 
-ENERGY = 1000
+ENERGY = 10000
 VISION = 200
 MAX_VELOCITY = 4
 
@@ -17,20 +17,30 @@ class Flock():
 	def addBoid( self, boid ):
 		self.boids.append( boid )
 
-	def run( self, screen, font, height, width ):
+	def run( self, sharks, screen, font, height, width ):
 		for boid in self.boids:
 			closeBoids = []
-			for otherBoid in self.boids:
-				if otherBoid.id == boid.id:
-					continue
-
-				distance = boid.distance( otherBoid )
+			closeSharks = []
+			for shark in sharks:
+				distance = boid.distance( shark )
 				if distance < boid.vision:
-					closeBoids.append( otherBoid )
+					closeSharks.append( shark )
 
-			boid.moveCloser( closeBoids )
-			boid.moveWith( closeBoids )
-			boid.moveAway( closeBoids, 20 )
+			if len( closeSharks ) > 0:
+				#boid.moveAwayOtherSide( closeSharks )
+				boid.moveAway( closeSharks, 60 )
+			else:
+				for otherBoid in self.boids:
+					if otherBoid.id == boid.id:
+						continue
+
+					distance = boid.distance( otherBoid )
+					if distance < boid.vision:
+						closeBoids.append( otherBoid )
+
+				boid.moveCloser( closeBoids )
+				boid.moveWith( closeBoids )
+				boid.moveAway( closeBoids, 40 )
 
 			border = 25
 			if boid.x < border and boid.velocityX < 0:
@@ -76,7 +86,7 @@ class SharkSet():
 					closeBoids.append( boid )
 
 			shark.moveCloser( closeBoids )
-			shark.moveWith( closeBoids )
+			#shark.moveWith( closeBoids )
 
 			border = 25
 			if shark.x < border and shark.velocityX < 0:
@@ -87,9 +97,9 @@ class SharkSet():
 				shark.velocityY = -shark.velocityY * random()
 			if shark.y > height - border and shark.velocityY > 0:
 				shark.velocityY = -shark.velocityY * random()
-				
+
 			shark.move()
-			
+
 		for shark in self.sharks:
 			sharkRect = pygame.Rect( shark.rect )
 			sharkRect.x = shark.x
@@ -151,6 +161,25 @@ class Individual():
 		self.velocityX += ( avgX / 40 )
 		self.velocityY += ( avgY / 40 )
 
+	def moveAwayOtherSide( self, individuals ):
+		if len( individuals ) < 1:
+			return
+
+		avgX = 0
+		avgY = 0
+		for individual in individuals:
+			if individual.x == self.x and individual.y == self.y:
+				continue
+
+			avgX += ( self.x - individual.x )
+			avgY += ( self.y - individual.y )
+
+		avgX /= len( individuals )
+		avgY /= len( individuals )
+
+		self.velocityX += ( avgX / 20 )
+		self.velocityY += ( avgY / 20 )
+
 	def moveAway( self, individuals, minDistance ):
 		if len( individuals ) < 1:
 			return
@@ -161,7 +190,7 @@ class Individual():
 
 		for individual in individuals:
 			distance = self.distance( individual )
-			if  distance < minDistance:
+			if distance < minDistance:
 				numClose += 1
 				xdiff = ( self.x - individual.x )
 				ydiff = ( self.y - individual.y )
