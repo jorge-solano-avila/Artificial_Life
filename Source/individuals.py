@@ -106,6 +106,34 @@ class SharkSet():
 			sharkRect.y = shark.y
 			screen.blit( shark.image, sharkRect )
 
+class TreeSet():
+	def __init__( self ):
+		self.trees = []
+
+	def addTree( self, tree ):
+		self.trees.append( tree )
+
+	def draw( self, screen ):
+		for tree in self.trees:
+			treeRect = pygame.Rect( tree.rect )
+			treeRect.x = tree.x
+			treeRect.y = tree.y
+			screen.blit( tree.image, treeRect )
+
+class FoodSet():
+	def __init__( self ):
+		self.food = pygame.sprite.RenderPlain()
+
+	def add( self, trees ):
+		tree = trees[randomRange( len( trees ) )]
+
+		self.food.empty()
+		for i in range( 200 ):
+			self.food.add( Food( randomRange( tree.x - 100, tree.x + 100 ), randomRange( tree.y - 100, tree.y + 100 ) ) )
+
+	def draw( self, screen ):
+		self.food.draw( screen )
+
 class Individual():
 	def __init__( self, type, id, image, x, y ):
 		self.type = type
