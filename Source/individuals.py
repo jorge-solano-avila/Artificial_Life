@@ -11,8 +11,9 @@ VISION = 200
 MAX_VELOCITY = 4
 
 class Flock():
-	def __init__( self ):
+	def __init__( self, skin ):
 		self.boids = []
+		self.skin = skin
 
 	def addBoid( self, boid ):
 		self.boids.append( boid )
@@ -66,6 +67,10 @@ class Flock():
 			boidRect.x = boid.x
 			boidRect.y = boid.y
 			screen.blit( boid.image, boidRect )
+			skinRect = pygame.Rect( self.skin.get_rect() )
+			skinRect.x = boid.x
+			skinRect.y = boid.y
+			screen.blit( self.skin, skinRect )
 			screen.blit( font.render( str( boid.energy ), True, ( 0, 0, 0 ) ), boidRect )
 
 			i += 1
