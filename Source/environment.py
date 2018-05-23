@@ -38,6 +38,8 @@ sharkSet = SharkSet()
 for i in range( SHARKS ):
 	sharkSet.addShark( Individual( 2, i, sharkImage, randomRange( width ), randomRange( height ) ) )
 
+foodIndex = 0
+ungeneratedFood = True
 while True:
 	for event in pygame.event.get():
 		if event.type == QUIT:
@@ -50,12 +52,14 @@ while True:
 	screen.blit( backgroundImage, ( 0, 0 ) )
 
 	flock1.run(
+		sharks = sharkSet.sharks,
 		screen = screen,
 		font = arialFont,
 		height = height,
 		width = width
 	)
 	flock2.run(
+		sharks = sharkSet.sharks,
 		screen = screen,
 		font = arialFont,
 		height = height,
@@ -68,5 +72,13 @@ while True:
 		width = width
 	)
 
+	miliseconds = pygame.time.get_ticks()
+	if miliseconds >= foodIndex * 30000 and miliseconds <= foodIndex * 30000 + 1000:
+		if ungeneratedFood:
+			print( "Generate food" )
+			ungeneratedFood = False
+			foodIndex += 1
+	if miliseconds >= ( foodIndex - 1 ) * 30000 + 1000:
+		ungeneratedFood = True
 	pygame.display.update()
 	pygame.time.delay( 10 )
