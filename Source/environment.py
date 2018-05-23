@@ -1,171 +1,108 @@
 import sys
 from random import randrange as randomRange
-from math import *
 
 import pygame
 from pygame.locals import *
 
-from individuals import Individual, Fish, Shark, Food, Badge
+from individuals import Flock, SharkSet, TreeSet, FoodSet, Individual
 
-def getCompleteRule( iterations ):
-	rules = ["X"]
-
-	for i in range( iterations ):
-		j = 0
-		while j < len( rules ):
-			if rules[j] == "X":
-				rules.pop( j )
-				for item in treeRules[0][::-1]:
-					rules.insert( j, item )
-				j += len( treeRules[0] ) - 1
-			elif rules[j] == "F":
-				rules.pop( j )
-				for item in treeRules[1][::-1]:
-					rules.insert( j, item )
-				j += len( treeRules[1] ) - 1
-			j += 1
-
-	return rules
+FISH_1 = 20
+FISH_2 = 30
+SHARKS = 5
+TREES = 10
 
 pygame.init()
-#clock = pygame.time.Clock()
 screen = pygame.display.set_mode( ( 960, 600 ), pygame.RESIZABLE )
-pygame.display.set_caption( "Artificial Life" )
+pygame.display.set_caption( "Artificial Life Project" )
+
+arialFont = pygame.font.SysFont( "Arial", 20, True )
+
+backgroundImage = pygame.image.load( "../Assets/background.jpg" ).convert()
+screen.blit( backgroundImage, ( 0, 0 ) )
 
 fishImage = pygame.image.load( "../Assets/fish.png" ).convert_alpha()
-#print( fishImage.get_width(), fishImage.get_height() )
-convertedFishImage = pygame.transform.scale( fishImage, ( 100, 60 ) )
+fishImageSmall = pygame.transform.scale( fishImage, ( 100, 60 ) )
 sharkImage = pygame.image.load( "../Assets/shark.png" ).convert_alpha()
-skin1 = pygame.image.load( "../Assets/skin1.png" ).convert()
-skin1 = pygame.transform.scale( skin1, ( int( skin1.get_width() / 4 ), int( skin1.get_height() / 4 ) ) )
-skin2 = pygame.image.load( "../Assets/skin2.png" ).convert()
-skin2 = pygame.transform.scale( skin2, ( int( skin2.get_width() / 6 ), int( skin2.get_height() / 6 ) ) )
-tree1 = pygame.image.load( "../Assets/tree1.png" ).convert_alpha()
-tree1 = pygame.transform.scale( tree1, ( int( tree1.get_width() / 2 ), int( tree1.get_height() / 2 ) ) )
-tree2 = pygame.image.load( "../Assets/tree2.png" ).convert_alpha()
-tree2 = pygame.transform.scale( tree2, ( int( tree2.get_width() / 2 ), int( tree2.get_height() / 2 ) ) )
-tree3 = pygame.image.load( "../Assets/tree3.png" ).convert_alpha()
-tree3 = pygame.transform.scale( tree3, ( int( tree3.get_width() / 2 ), int( tree3.get_height() / 2 ) ) )
-
-background = pygame.image.load( "../Assets/background.jpg" ).convert()
-screen.blit( background, ( 0, 0 ) )
-
-treeTotal = 10
-fishTotal = 50
-sharkTotal = 3
-foodTotal = 100
-fishList = []
-skinList = []
-sharkList = []
-food = pygame.sprite.RenderPlain()
-#badges = pygame.sprite.RenderPlain()
-font = pygame.font.SysFont( "Arial", 20, True )
-
-treeRules = ["F-[[X]+X]+F[+FX]-X", "FF"]
-
-for index in range( fishTotal ):
-	#fishList.append( Fish( 1, index + 1, fishImage ) )
-	if index % 2 == 0:
-		fish = Fish( 1, index + 1, fishImage )
-		skin = Individual( 0, 0, skin1 )
-	else:
-		fish = Fish( 2, index + 1, convertedFishImage )
-		skin = Individual( 0, 0, skin2 )
-	fishList.append( fish )
-	skinList.append( skin )
-	#badges.add( Badge( fish.x, fish.y ) )
-
-for index in range( sharkTotal ):
-	sharkList.append( Shark( 3, index + 1, sharkImage ) )
+tree1Image = pygame.image.load( "../Assets/tree1.png" ).convert_alpha()
+tree1Image = pygame.transform.scale( tree1Image, ( int( tree1Image.get_width() / 2 ), int( tree1Image.get_height() / 2 ) ) )
+tree2Image = pygame.image.load( "../Assets/tree2.png" ).convert_alpha()
+tree2Image = pygame.transform.scale( tree2Image, ( int( tree2Image.get_width() / 2 ), int( tree2Image.get_height() / 2 ) ) )
+tree3Image = pygame.image.load( "../Assets/tree3.png" ).convert_alpha()
+tree3Image = pygame.transform.scale( tree3Image, ( int( tree3Image.get_width() / 2 ), int( tree3Image.get_height() / 2 ) ) )
 
 height = pygame.display.Info().current_h
 width = pygame.display.Info().current_w
-for index in range( foodTotal ):
-	food.add( Food( randomRange( width ), randomRange( 3 * height / 4, height ) ) )
-screen.blit( background, ( 0, 0 ) )
-food.draw( screen )
-#badges.draw( screen )
 
-def drawTree( width, height ):
-	rule = getCompleteRule( 5 )
-	position = ( randomRange( height ), height )
-	unit = 6
-	initialAngle = -90
-	angle = 20
-	angles = []
-	positions = []
-	for letter in rule:
-		if letter == "F":
-			dx = cos( radians( initialAngle ) ) * unit
-			dy = sin( radians( initialAngle ) ) * unit
+flock1 = Flock()
+for i in range( FISH_1 ):
+	flock1.addBoid( Individual( 0, i, fishImage, randomRange( width ), randomRange( height ) ) )
 
-			initialAngleAbs = abs( initialAngle )
-			color = ( 255, 0, 0 )
-			test1 = pygame.draw.line( screen, color, position, ( position[0] + dx, position[1] + dy ) )
-			test2 = pygame.display.update( ( position[0] - 1, position[1] - 1, position[0] + dx + 1, position[1] + dy + 1 ) )
+flock2 = Flock()
+for i in range( FISH_2 ):
+	flock2.addBoid( Individual( 1, i, fishImageSmall, randomRange( width ), randomRange( height ) ) )
 
-			position = ( position[0] + dx, position[1] + dy )
-		elif letter == "+":
-			initialAngle += angle
-		elif letter == "-":
-			initialAngle -= angle
-		elif letter == "[":
-			positions.append( position )
-			angles.append( initialAngle )
-		elif letter == "]":
-			position = positions.pop()
-			initialAngle = angles.pop()
+sharkSet = SharkSet()
+for i in range( SHARKS ):
+	sharkSet.addShark( Individual( 2, i, sharkImage, randomRange( width ), randomRange( height ) ) )
 
-	return test1
+treeSet = TreeSet()
+for i in range( TREES ):
+	trees = [tree1Image, tree2Image, tree3Image]
+	treeSet.addTree( Individual( 3, i, trees[randomRange( 3 )], randomRange( width ), randomRange( height ) ) )
 
-#tree = drawTree( width, height )
-#print( tree.center )
+foodSet = FoodSet()
 
-treeImages = [tree1, tree3]
-trees = []
-for i in range( treeTotal ):
-	trees.append( treeImages[randomRange( len( treeImages ) )] )
-
+foodIndex = 0
+ungeneratedFood = True
 while True:
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			sys.exit()
 		if event.type == pygame.VIDEORESIZE:
 			screen = pygame.display.set_mode( ( event.w, event.h ), pygame.RESIZABLE )
-			food.empty()
 			height = pygame.display.Info().current_h
 			width = pygame.display.Info().current_w
-			for index in range( foodTotal ):
-				food.add( Food( randomRange( width ), randomRange( 3 * height / 4, height ) ) )
 
-	#msElapsed = clock.tick(120)
-	#drawTree( width, height )
+			treeSet = TreeSet()
+			for i in range( TREES ):
+				trees = [tree1Image, tree2Image, tree3Image]
+				treeSet.addTree( Individual( 3, i, trees[randomRange( 3 )], randomRange( width ), randomRange( height ) ) )
 
-	screen.blit( background, ( 0, 0 ) )
-	food.draw( screen )
-	#badges.empty()
-	for i in range( len( fishList ) ):
-		fish = fishList[i]
-		screen.blit( background, fish.position, fish.position )
-		#screen.blit( background, fish.position, fish.position )
-	for shark in sharkList:
-		screen.blit( background, shark.position, shark.position )
+			foodSet.add( trees = treeSet.trees )
 
-	for shark in sharkList:
-		shark.move( fishList )
-		screen.blit( shark.image, shark.position )
-	for i in range( len( fishList ) ):
-		fish = fishList[i]
-		skin = skinList[i]
-		fish.move( fishList, sharkList, food )
-		if fish.energy > 0:
-			screen.blit( fish.image, fish.position )
-			screen.blit( skin.image, fish.position.center )
-			#badges.add( Badge( fish.position.centerx, fish.position.centery ) )
-			screen.blit( font.render( str( fish.energy ), True, ( 0, 0, 0 ) ), fish.position )
-	#badges.draw( screen )
-	for i in range( treeTotal ):
-		tree = trees[i]
-		screen.blit( tree, ( int( ( i + 1 ) * width / treeTotal ), height - tree.get_height() ) )
+	screen.blit( backgroundImage, ( 0, 0 ) )
 
+	flock1.run(
+		sharks = sharkSet.sharks,
+		screen = screen,
+		font = arialFont,
+		height = height,
+		width = width
+	)
+	flock2.run(
+		sharks = sharkSet.sharks,
+		screen = screen,
+		font = arialFont,
+		height = height,
+		width = width
+	)
+	sharkSet.run(
+		boids = flock1.boids + flock2.boids,
+		screen = screen,
+		height = height,
+		width = width
+	)
+	treeSet.draw( screen = screen )
+	foodSet.draw( screen = screen )
+
+	miliseconds = pygame.time.get_ticks()
+	if miliseconds >= foodIndex * 30000 and miliseconds <= foodIndex * 30000 + 1000:
+		if ungeneratedFood:
+			foodSet.add( trees = treeSet.trees )
+
+			ungeneratedFood = False
+			foodIndex += 1
+	if miliseconds >= ( foodIndex - 1 ) * 30000 + 1000:
+		ungeneratedFood = True
 	pygame.display.update()
+	pygame.time.delay( 10 )
