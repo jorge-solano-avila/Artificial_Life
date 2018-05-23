@@ -7,18 +7,21 @@ from pygame.locals import *
 from pygame.color import *
 
 ENERGY = 10000
+FOOD_ENERGY = 10
 VISION = 200
 MAX_VELOCITY = 4
 
 class Flock():
-	def __init__( self, skin ):
+	def __init__( self, skin, fish, reproduceProbability ):
 		self.boids = []
 		self.skin = skin
+		self.fish = fish
+		self.reproduceProbability = reproduceProbability
 
 	def addBoid( self, boid ):
 		self.boids.append( boid )
 
-	def run( self, sharks, screen, font, height, width ):
+	def run( self, sharks, food, screen, fishImage, fishImageSmall, font, height, width ):
 		for boid in self.boids:
 			closeBoids = []
 			closeSharks = []
@@ -27,10 +30,49 @@ class Flock():
 				if distance < boid.vision:
 					closeSharks.append( shark )
 
-			if len( closeSharks ) > 0:
-				#boid.moveAwayOtherSide( closeSharks )
+			if len( closeSharks ) > 0: # Avoid sharks
 				boid.moveAway( closeSharks, 60 )
-			else:
+			elif boid.energy < 5000: 
+				closeFood = []
+				for sprite in food:
+					if sprite.energy < 1:
+						sprite.remove()
+						continue
+					distance = boid.distance( sprite.rect )
+					if distance < boid.vision:
+						closeFood.append( sprite )
+
+				if len( closeFood ) > 0: # Eat
+					boid.moveCloser( closeFood )
+					boid.energy += 10
+					for sprite in closeFood:
+						sprite.energy -= 1
+				else: # Boids
+					canReproduce = False
+					for otherBoid in self.boids:
+						if otherBoid.id == boid.id:
+							continue
+
+						distance = boid.distance( otherBoid )
+						if distance < boid.vision:
+							closeBoids.append( otherBoid )
+						if distance < 100:
+							canReproduce = True
+							
+					if canReproduce:
+						probability = random()
+						if probability < self.reproduceProbability:
+							if boid.type == 0:
+								newBoid = Individual( 0, self.boids[-1].id + 1, self.fish, boid.x, boid.y )
+							else:
+								newBoid = Individual( 1, self.boids[-1].id + 1, self.fish, boid.x, boid.y )
+							self.boids.append( newBoid )
+
+					boid.moveCloser( closeBoids )
+					boid.moveWith( closeBoids )
+					boid.moveAway( closeBoids, 40 )
+			else: # Boids
+				canReproduce = False
 				for otherBoid in self.boids:
 					if otherBoid.id == boid.id:
 						continue
@@ -38,6 +80,17 @@ class Flock():
 					distance = boid.distance( otherBoid )
 					if distance < boid.vision:
 						closeBoids.append( otherBoid )
+					if distance < 100:
+						canReproduce = True
+						
+				if canReproduce:
+					probability = random()
+					if probability < self.reproduceProbability:
+						if boid.type == 0:
+							newBoid = Individual( 0, self.boids[-1].id + 1, self.fish, boid.x, boid.y )
+						else:
+							newBoid = Individual( 1, self.boids[-1].id + 1, self.fish, boid.x, boid.y )
+						self.boids.append( newBoid )
 
 				boid.moveCloser( closeBoids )
 				boid.moveWith( closeBoids )
@@ -89,9 +142,10 @@ class SharkSet():
 				distance = shark.distance( boid )
 				if distance < VISION:
 					closeBoids.append( boid )
+				if distance < 50:
+					boid.energy -= 10000
 
 			shark.moveCloser( closeBoids )
-			#shark.moveWith( closeBoids )
 
 			border = 25
 			if shark.x < border and shark.velocityX < 0:
@@ -194,25 +248,6 @@ class Individual():
 		self.velocityX += ( avgX / 40 )
 		self.velocityY += ( avgY / 40 )
 
-	def moveAwayOtherSide( self, individuals ):
-		if len( individuals ) < 1:
-			return
-
-		avgX = 0
-		avgY = 0
-		for individual in individuals:
-			if individual.x == self.x and individual.y == self.y:
-				continue
-
-			avgX += ( self.x - individual.x )
-			avgY += ( self.y - individual.y )
-
-		avgX /= len( individuals )
-		avgY /= len( individuals )
-
-		self.velocityX += ( avgX / 20 )
-		self.velocityY += ( avgY / 20 )
-
 	def moveAway( self, individuals, minDistance ):
 		if len( individuals ) < 1:
 			return
@@ -274,6 +309,7 @@ class Food( pygame.sprite.Sprite ):
 		self.height = 10
 		self.image = self.draw()
 		self.rect = Rect( x, y, self.width, self.height )
+		self.energy = FOOD_ENERGY
 
 	def draw( self ):
 		screen = pygame.Surface( ( self.width, self.height ) )
