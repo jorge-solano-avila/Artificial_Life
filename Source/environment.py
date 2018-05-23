@@ -6,9 +6,9 @@ from pygame.locals import *
 
 from individuals import Flock, SharkSet, TreeSet, FoodSet, Individual
 
-FISH_1 = 20
-FISH_2 = 30
-SHARKS = 5
+FISH_1 = 10
+FISH_2 = 20
+SHARKS = 3
 TREES = 10
 
 pygame.init()
@@ -29,15 +29,19 @@ tree2Image = pygame.image.load( "../Assets/tree2.png" ).convert_alpha()
 tree2Image = pygame.transform.scale( tree2Image, ( int( tree2Image.get_width() / 2 ), int( tree2Image.get_height() / 2 ) ) )
 tree3Image = pygame.image.load( "../Assets/tree3.png" ).convert_alpha()
 tree3Image = pygame.transform.scale( tree3Image, ( int( tree3Image.get_width() / 2 ), int( tree3Image.get_height() / 2 ) ) )
+skin1Image = pygame.image.load( "../Assets/skin1.png" ).convert()
+skin1Image = pygame.transform.scale( skin1Image, ( int( skin1Image.get_width() / 4 ), int( skin1Image.get_height() / 4 ) ) )
+skin2Image = pygame.image.load( "../Assets/skin2.png" ).convert()
+skin2Image = pygame.transform.scale( skin2Image, ( int( skin2Image.get_width() / 6 ), int( skin2Image.get_height() / 6 ) ) )
 
 height = pygame.display.Info().current_h
 width = pygame.display.Info().current_w
 
-flock1 = Flock()
+flock1 = Flock( skin = skin1Image )
 for i in range( FISH_1 ):
 	flock1.addBoid( Individual( 0, i, fishImage, randomRange( width ), randomRange( height ) ) )
 
-flock2 = Flock()
+flock2 = Flock( skin = skin2Image )
 for i in range( FISH_2 ):
 	flock2.addBoid( Individual( 1, i, fishImageSmall, randomRange( width ), randomRange( height ) ) )
 
