@@ -114,13 +114,13 @@ while True:
 	foodSet.draw( screen = screen )
 
 	miliseconds = pygame.time.get_ticks()
-	if miliseconds >= foodIndex * 60000 and miliseconds <= foodIndex * 60000 + 1000:
+	if miliseconds >= foodIndex * 30000 and miliseconds <= foodIndex * 30000 + 1000:
 		if ungeneratedFood:
 			foodSet.add( trees = treeSet.trees )
 
 			ungeneratedFood = False
 			foodIndex += 1
-	if miliseconds >= ( foodIndex - 1 ) * 60000 + 1000:
+	if miliseconds >= ( foodIndex - 1 ) * 30000 + 1000:
 		ungeneratedFood = True
 	pygame.display.update()
 	pygame.time.delay( 10 )
